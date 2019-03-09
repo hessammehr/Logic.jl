@@ -2,17 +2,24 @@ struct Var
     name::String
 end
 
-const Head = Vector{Predicate}
-const Body = Vector{Union{Predicate, Var}}
+const Goal = Union{Predicate, Conj, Disj}
 
-struct Clause
-    head::Head
-    body::Body
+struct Conj{N} where N
+    goals::NTuple{N, Goal}
+end
+
+struct Disj
+    goals::NTuple{N, Goal}
 end
 
 struct Predicate
     name::String
     params::Vector{Union{Predicate, Var, Const}}
+end
+
+struct Clause
+    head::Goal
+    body::Goal
 end
 
 const Database = Vector{Clause}
