@@ -1,20 +1,20 @@
-struct Var
-    name::String
+abstract type Predicate
 end
 
-const Goal = Union{Predicate, Conj, Disj}
-
-struct Conj{N} where N
-    goals::NTuple{N, Goal}
+struct Literal{T} where T
+    val :: T
 end
 
-struct Disj
-    goals::NTuple{N, Goal}
+const Goal = Union{Predicate, Var, Literal}
+
+const Substitution = Tuple{Var, Predicate}
+
+struct Conj <: Predicate
+    goals::Tuple
 end
 
-struct Predicate
-    name::String
-    params::Vector{Union{Predicate, Var, Const}}
+struct Disj <: Predicate
+    goals::Tuple
 end
 
 struct Clause
