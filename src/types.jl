@@ -1,8 +1,12 @@
 abstract type Predicate
 end
 
-struct Literal{T} where T
+struct Literal{T}
     val :: T
+end
+
+struct Var
+    name::String
 end
 
 const Goal = Union{Predicate, Var, Literal}
