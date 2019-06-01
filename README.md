@@ -1,13 +1,7 @@
 # Logic.jl
-Sketch of a Prolog interpreter in Julia. Aiming to have a nice Julia API of the purer parts of Prolog. It would be cool if Constraint Handling Rules (CHR) could be implemented on top of this subset.
-
-Other goals:
-- Make the database/context explicit.
-- 
-- Find how well-suited Julia is to this problem. I think Julia has a lot of potential beyond typical numerical applications, as demonstrated
-by a number of projects.
-
-I have purposely not read about the implementation of the Warren Abstract Machine (WAM) hoping to come up with something (possibly) different.
+Sketch of a typed Prolog interpreter in Julia. Aiming to have a nice Julia
+API of the purer parts of Prolog. Also curious about performance and whether
+typing helps at all.
 
 ## Getting started
 
