@@ -17,6 +17,13 @@ Var(args...) = Var{Any}(args...)
 
 Variable{T} = Union{T, Var{T}} where T
 
+macro var(decl)
+    name, type = decl isa Symbol ? (decl, Any) : decl.args
+    quote
+        $(esc(name)) = Var{$type}($(string(name)))
+    end
+end
+
 abstract type Predicate end
 
 macro predicate(decl)
@@ -38,14 +45,24 @@ end
     )
 end
 
-macro var(decl)
-    name, type = decl isa Symbol ? (decl, Any) : decl.args
-    quote
-        $(esc(name)) = Var{$type}($(string(name)))
-    end
+nameof(::T) where T<:Predicate  = Symbol(T)
+
+struct Conj{T<:NTuple{N, Predicate} where N}
+    predicates::T
+end
+Conj(args...) = Conj(args)
+
+struct Disj{T<:NTuple{N, Predicate} where N}
+    predicates::T
+end
+Disj(args...) = Disj(args)
+
+struct Clause
+    head::Predicate
+    body::Union{Predicate, Conj, Disj, Nothing}
 end
 
-nameof(::T) where T<:Predicate  = Symbol(T)
+Clause(head::Predicate) = Clause(head, nothing)
 
 abstract type Result end
 
@@ -66,6 +83,8 @@ unify(v::Var{T}, x::Variable{T}) where T = Success(Dict(v => x))
 unify(x::T, v::Var{T}) where T = unify(v, x)
 
 unify(p1::P, p2::P) where P<:Predicate = intersection(unify(p1, p2) for (p1, p2) in zip(params(p1), params(p2)))
+
+unify(p::Predicate, cl::Clause) = unify(p, cl.head)
 
 # fallback
 unify(x, y) = x == y ? Success() : Failure(x, y)
@@ -89,5 +108,13 @@ intersection(u1, u2::Failure) = u2
 unionof(v1::Var{T}, v2::Variable{T}) where T = v2, true
 unionof(v1::T, v2::Var{T}) where T = v1, true
 unionof(v1, v2) = v1 == v2 ? (v1, true) : (nothing, false)
+
+function query(p::Predicate, db::AbstractArray{Clause})
+    matches = Iterators.filter(result -> results isa Success, ((clause, unify(p, clause)) for clause in db))
+    isempty(matches) && return false
+    for (clause, match) in matches
+        result = reduce(intersection, (query(clause.body, db)))
+    end
+end
 
 end
